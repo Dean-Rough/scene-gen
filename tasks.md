@@ -2,32 +2,57 @@
 
 This file tracks tasks for AI agents using git worktrees and tmux sessions.
 
-## Current Tasks
+## Phase 1: Complete ✅
+**Status**: All core functionality implemented and deployed
+- ✅ Database schema with PostgreSQL (projects, assets, scene_elements)
+- ✅ Complete CRUD API endpoints for projects and assets  
+- ✅ Interactive canvas component for asset placement
+- ✅ Asset library with upload functionality
+- ✅ Frontend-backend integration with working proxy
+- ✅ Neon DB connected and tested
+- ✅ Production build ready for Vercel deployment
 
-### Task 1: Backend - Database Schema
-- **Branch**: feature/db-schema
-- **Status**: pending
-- **Description**: Implement the initial PostgreSQL schema using `node-postgres`. Create a script in `backend/db/init.js` that, when run, connects to the `DATABASE_URL` and creates the following tables: `projects` (id, name), `assets` (id, project_id, type, image_url, attributes_json), and `scene_elements` (id, project_id, asset_id, position_x, position_y, rotation_z).
+## Phase 2: Enhancement & Scaling Tasks
 
-### Task 2: Backend - Project CRUD Endpoints
-- **Branch**: feature/project-endpoints
+### Task 1: Real Gemini AI Integration
+- **Branch**: feature/gemini-integration
 - **Status**: pending
-- **Description**: In `backend/routes/api.js`, create the REST endpoints for managing projects. Implement `POST /projects` to create a new project, `GET /projects/:id` to fetch a project with its assets and scene elements, and `PUT /projects/:id` to update a project's name or contents.
+- **Description**: Replace the simulated render endpoint with real Gemini 2.5 Flash Image API integration. Implement the Prompt Orchestration Engine that constructs multimodal prompts combining floorplan images, asset placements, materials, and render settings. Handle image uploads to cloud storage and integrate with Gemini API for actual AI rendering.
 
-### Task 3: Frontend - Canvas Component Setup
-- **Branch**: feature/canvas-component
+### Task 2: Advanced Canvas with React-Konva
+- **Branch**: feature/advanced-canvas
 - **Status**: pending
-- **Description**: Create the main interactive canvas component at `frontend/src/components/DesignCanvas.js`. Use the `react-konva` library to set up a Stage. This component should accept a floorplan image URL as a prop and render it as the background of the Konva Stage.
+- **Description**: Upgrade the simplified HTML canvas to a full React-Konva implementation with drag-and-drop, rotation, scaling, and layer management. Add asset transformation controls, snap-to-grid functionality, and proper collision detection for a professional design experience.
 
-### Task 4: Frontend - Asset Library UI
-- **Branch**: feature/asset-library-ui
+### Task 3: Cloud Asset Storage System
+- **Branch**: feature/cloud-storage
 - **Status**: pending
-- **Description**: Create the `frontend/src/components/AssetLibrary.js` component. It should have a button to trigger a file input for uploading asset images (e.g., furniture). Display the uploaded images as thumbnails in a scrollable list. Clicking a thumbnail should set it as the currently selected asset in the parent component's state.
+- **Description**: Implement cloud storage integration (AWS S3 or Google Cloud Storage) for uploaded assets. Replace local blob URLs with permanent cloud URLs, add image optimization, thumbnail generation, and CDN integration for better performance and scalability.
 
-### Task 5: Frontend - Place Asset on Canvas
-- **Branch**: feature/place-asset
+### Task 4: User Authentication & Multi-tenancy
+- **Branch**: feature/auth-system
 - **Status**: pending
-- **Description**: Implement the logic to add a selected asset to the canvas. When the user clicks on the `DesignCanvas`, an image of the currently selected asset from the `AssetLibrary` should appear on the canvas at the click coordinates. Make these new images draggable.
+- **Description**: Integrate user authentication using the provided Stack Auth keys. Implement user-specific project isolation, sharing capabilities, and role-based permissions. Add user profiles, project collaboration features, and secure API endpoints.
+
+### Task 5: Advanced Rendering Features
+- **Branch**: feature/advanced-rendering
+- **Status**: pending
+- **Description**: Implement advanced rendering options including lighting controls, camera positioning, material specifications, and style presets. Add render history, batch processing, and high-resolution export capabilities with progress tracking.
+
+### Task 6: Performance Optimization
+- **Branch**: feature/performance
+- **Status**: pending
+- **Description**: Optimize application performance with React.memo, virtualization for large asset libraries, lazy loading, bundle splitting, and database query optimization. Implement caching strategies and background processing for renders.
+
+### Task 7: Mobile Responsive Design
+- **Branch**: feature/mobile-responsive
+- **Status**: pending
+- **Description**: Create responsive design for mobile and tablet devices. Implement touch-friendly canvas interactions, mobile-optimized asset library, and adaptive UI components that work across all screen sizes.
+
+### Task 8: Vercel Deployment & CI/CD
+- **Branch**: feature/deployment
+- **Status**: pending
+- **Description**: Set up automated Vercel deployment with proper environment variable management, preview deployments for pull requests, and CI/CD pipeline with automated testing. Configure custom domain and SSL certificates.
 
 ## Task Status Legend
 - **pending**: Available for assignment
