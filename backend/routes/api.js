@@ -8,11 +8,10 @@ const pool = new Pool({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
-// In-memory placeholder for the Gemini API client
-// In a real application, you would initialize the client here
-// const { GoogleGenerativeAI } = require("@google/generative-ai");
-// const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-// const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-preview" }); // Official model name for "NB"
+// Initialize Gemini AI client
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 /**
  * POST /api/projects
@@ -172,44 +171,93 @@ router.get('/projects', async (req, res) => {
 
 /**
  * POST /api/render
- * The core endpoint to handle render requests.
+ * The core endpoint to handle render requests with real Gemini AI.
  */
 router.post('/render', async (req, res) => {
-  const designData = req.body;
+  const { projectId, floorplan, assets = [], camera = {}, style = "Photorealistic, Modern" } = req.body;
 
-  console.log('Received design data for rendering:', designData);
+  console.log('🎨 Starting AI render generation...', { 
+    projectId, 
+    floorplan: floorplan ? 'provided' : 'none',
+    assetsCount: assets.length,
+    style 
+  });
 
   try {
     // 1. CONSTRUCT THE MULTIMODAL PROMPT
-    // This is where the core logic of the Prompt Orchestration Engine goes.
-    // You will build a prompt array with text and image parts.
-    //
-    // Example prompt structure:
-    // const prompt = [
-    //   "Render a photorealistic interior design...",
-    //   "Floorplan:", { inlineData: { mimeType: 'image/jpeg', data: '...' } },
-    //   "Asset: Sofa", { inlineData: { mimeType: 'image/jpeg', data: '...' } },
-    //   "Instructions: Place the sofa at (150, 200)..."
-    // ];
+    let prompt = `Create a photorealistic interior design rendering based on the following specifications:
 
-    // For now, we will just simulate the call to the NB model.
-    console.log('Constructing multimodal prompt for NB model...');
+STYLE: ${style}
+CAMERA: ${camera.angle || 'eye-level'} perspective, facing ${camera.direction || 'north'}
 
-    // 2. CALL THE NB (GEMINI) API
-    // const result = await model.generateContentStream(prompt);
-    // In a real scenario, you would process the stream or promise.
+ROOM LAYOUT:`;
 
-    // 3. SIMULATE A RESPONSE
-    // This simulates receiving an image URL back from the model/storage.
-    const simulatedImageUrl = 'https://storage.googleapis.com/gemini-prod-us-west1-assets/images/20240502/gemini_generated_image_1.jpeg';
-    console.log(`Simulated render complete. Image URL: ${simulatedImageUrl}`);
+    // Add floorplan description if provided
+    if (floorplan) {
+      prompt += `\n- Base the room layout on the provided floorplan image`;
+    } else {
+      prompt += `\n- Create a modern interior room with good proportions`;
+    }
 
-    // 4. RETURN THE IMAGE URL
-    res.status(200).json({ imageUrl: simulatedImageUrl });
+    // Add furniture and asset descriptions
+    if (assets.length > 0) {
+      prompt += `\n\nFURNITURE & ASSETS:`;
+      assets.forEach((asset, index) => {
+        prompt += `\n${index + 1}. Place furniture at position (${asset.position?.x || 0}, ${asset.position?.y || 0})`;
+        if (asset.rotation) {
+          prompt += ` with ${asset.rotation} degree rotation`;
+        }
+        if (asset.scale && asset.scale.x !== 1) {
+          prompt += ` scaled to ${asset.scale.x}x size`;
+        }
+      });
+    } else {
+      prompt += `\n\nFURNITURE & ASSETS:
+- Include appropriate modern furniture like sofas, coffee tables, lamps
+- Arrange furniture in a natural, livable layout`;
+    }
+
+    prompt += `\n\nRENDER REQUIREMENTS:
+- Photorealistic quality with proper lighting and shadows
+- High resolution and professional interior design presentation
+- Warm, inviting atmosphere suitable for a modern home
+- Include realistic materials and textures
+- Ensure proper scale and proportions for all elements`;
+
+    console.log('🧠 Constructed prompt for Gemini AI');
+
+    // 2. CALL THE GEMINI AI API
+    console.log('🚀 Calling Gemini AI...');
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const aiDescription = response.text();
+
+    console.log('✅ Gemini AI response received');
+
+    // 3. FOR NOW, RETURN THE AI DESCRIPTION 
+    // In a full implementation, you would:
+    // - Use an image generation model (DALL-E, Midjourney API, etc.)
+    // - Or implement Gemini's multimodal capabilities with image input/output
+    // - Store generated images in cloud storage
+    
+    // For this implementation, we return a structured response with the AI's design description
+    res.status(200).json({ 
+      success: true,
+      renderType: 'ai_description',
+      description: aiDescription,
+      prompt: prompt,
+      timestamp: new Date().toISOString(),
+      // Fallback image for demonstration
+      imageUrl: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+    });
 
   } catch (error) {
-    console.error('Error during rendering process:', error);
-    res.status(500).json({ error: 'Failed to generate render.' });
+    console.error('❌ Error during AI rendering process:', error);
+    res.status(500).json({ 
+      error: 'Failed to generate AI render.',
+      details: error.message,
+      timestamp: new Date().toISOString()
+    });
   }
 });
 

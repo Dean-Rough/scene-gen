@@ -155,7 +155,12 @@ function App() {
 
     try {
       const response = await axios.post('/api/render', designData);
-      setImageUrl(response.data.imageUrl);
+      // Handle both old format (just imageUrl) and new format (full AI response)
+      if (response.data.success) {
+        setImageUrl(response.data); // Store the full AI response
+      } else {
+        setImageUrl(response.data.imageUrl); // Fallback to old format
+      }
     } catch (err) {
       setError('Failed to generate render. Please check the console.');
       console.error(err);
@@ -281,19 +286,69 @@ function App() {
         {/* Render Results */}
         {imageUrl && (
           <div className="results" style={{ textAlign: 'center', padding: '20px' }}>
-            <h2>AI-Generated Render:</h2>
-            <div className="image-container" style={{ 
-              border: '2px solid #ddd', 
+            <h2>🤖 AI-Generated Interior Design</h2>
+            <div className="ai-response" style={{ 
+              border: '2px solid #007bff', 
               borderRadius: '8px', 
-              padding: '10px',
-              display: 'inline-block',
-              backgroundColor: 'white'
+              padding: '20px',
+              backgroundColor: 'white',
+              textAlign: 'left',
+              maxWidth: '800px',
+              margin: '0 auto'
             }}>
-              <img 
-                src={imageUrl} 
-                alt="AI-generated interior design" 
-                style={{ maxWidth: '100%', height: 'auto', borderRadius: '4px' }}
-              />
+              {/* AI Description */}
+              <div style={{ marginBottom: '20px' }}>
+                <h3 style={{ color: '#007bff', marginTop: '0' }}>💭 AI Design Analysis:</h3>
+                <div style={{ 
+                  backgroundColor: '#f8f9fa', 
+                  padding: '15px', 
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  lineHeight: '1.6',
+                  whiteSpace: 'pre-wrap'
+                }}>
+                  {/* Show AI description if available */}
+                  {typeof imageUrl === 'object' && imageUrl.description ? imageUrl.description : 
+                   'AI analysis not available for this render.'}
+                </div>
+              </div>
+
+              {/* Reference Image */}
+              <div>
+                <h3 style={{ color: '#007bff' }}>🖼️ Reference Image:</h3>
+                <img 
+                  src={typeof imageUrl === 'object' ? imageUrl.imageUrl : imageUrl}
+                  alt="Interior design reference" 
+                  style={{ 
+                    maxWidth: '100%', 
+                    height: 'auto', 
+                    borderRadius: '4px',
+                    border: '1px solid #ddd'
+                  }}
+                />
+                <p style={{ 
+                  fontSize: '12px', 
+                  color: '#666', 
+                  marginTop: '5px',
+                  fontStyle: 'italic'
+                }}>
+                  Reference image while we work on implementing image generation capabilities.
+                </p>
+              </div>
+
+              {/* Timestamp */}
+              {typeof imageUrl === 'object' && imageUrl.timestamp && (
+                <div style={{ 
+                  fontSize: '12px', 
+                  color: '#999', 
+                  textAlign: 'center',
+                  marginTop: '15px',
+                  borderTop: '1px solid #eee',
+                  paddingTop: '10px'
+                }}>
+                  Generated: {new Date(imageUrl.timestamp).toLocaleString()}
+                </div>
+              )}
             </div>
           </div>
         )}

@@ -16,17 +16,20 @@ This file tracks tasks for AI agents using git worktrees and tmux sessions.
 
 ### Task 1: Real Gemini AI Integration
 - **Branch**: feature/gemini-integration
-- **Status**: pending
+- **Status**: claimed
+- **Agent**: gemini-ai (tmux session)
 - **Description**: Replace the simulated render endpoint with real Gemini 2.5 Flash Image API integration. Implement the Prompt Orchestration Engine that constructs multimodal prompts combining floorplan images, asset placements, materials, and render settings. Handle image uploads to cloud storage and integrate with Gemini API for actual AI rendering.
 
 ### Task 2: Advanced Canvas with React-Konva
 - **Branch**: feature/advanced-canvas
-- **Status**: pending
+- **Status**: claimed
+- **Agent**: advanced-canvas (tmux session)
 - **Description**: Upgrade the simplified HTML canvas to a full React-Konva implementation with drag-and-drop, rotation, scaling, and layer management. Add asset transformation controls, snap-to-grid functionality, and proper collision detection for a professional design experience.
 
 ### Task 3: Cloud Asset Storage System
 - **Branch**: feature/cloud-storage
-- **Status**: pending
+- **Status**: claimed
+- **Agent**: cloud-storage (tmux session)
 - **Description**: Implement cloud storage integration (AWS S3 or Google Cloud Storage) for uploaded assets. Replace local blob URLs with permanent cloud URLs, add image optimization, thumbnail generation, and CDN integration for better performance and scalability.
 
 ### Task 4: User Authentication & Multi-tenancy
@@ -51,7 +54,8 @@ This file tracks tasks for AI agents using git worktrees and tmux sessions.
 
 ### Task 8: Vercel Deployment & CI/CD
 - **Branch**: feature/deployment
-- **Status**: pending
+- **Status**: claimed
+- **Agent**: vercel-deploy (tmux session)
 - **Description**: Set up automated Vercel deployment with proper environment variable management, preview deployments for pull requests, and CI/CD pipeline with automated testing. Configure custom domain and SSL certificates.
 
 ## Task Status Legend
@@ -61,7 +65,52 @@ This file tracks tasks for AI agents using git worktrees and tmux sessions.
 - **completed**: Ready for review/merge
 - **intervention_required**: Needs human input
 
-## Usage
-1. Use `/tmux-spawn <name> <branch> <task>` to assign tasks
-2. Use `/tmux-status` to check progress
-3. Use `/tmux-list` to see active agents
+## TMUX Agent Management
+
+### Deployed Agents
+All agents are currently deployed and running in isolated git worktrees:
+
+| Agent Name | Session | Branch | Status |
+|------------|---------|--------|--------|
+| gemini-ai | `gemini-ai` | feature/gemini-integration | ✅ ACTIVE |
+| advanced-canvas | `advanced-canvas` | feature/advanced-canvas | ✅ ACTIVE |
+| cloud-storage | `cloud-storage` | feature/cloud-storage | ✅ ACTIVE |
+| vercel-deploy | `vercel-deploy` | feature/deployment | ✅ ACTIVE |
+
+### Management Commands
+Use the `./tmux-agents.sh` script for agent management:
+
+```bash
+# Check agent status
+./tmux-agents.sh status
+
+# List active sessions  
+./tmux-agents.sh list
+
+# Attach to a specific agent
+./tmux-agents.sh attach gemini-ai
+./tmux-agents.sh attach advanced-canvas
+./tmux-agents.sh attach cloud-storage
+./tmux-agents.sh attach vercel-deploy
+
+# Kill a specific agent
+./tmux-agents.sh kill <agent-name>
+
+# Kill all agents
+./tmux-agents.sh kill-all
+
+# Deploy/restart all agents
+./tmux-agents.sh deploy
+```
+
+### Manual TMUX Commands
+```bash
+# List sessions
+tmux list-sessions
+
+# Attach to session
+tmux attach-session -t <agent-name>
+
+# Kill session
+tmux kill-session -t <agent-name>
+```
