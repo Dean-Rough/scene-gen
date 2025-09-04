@@ -20,6 +20,7 @@ function App() {
   // Load projects on component mount
   useEffect(() => {
     loadProjects();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadProjects = async () => {
