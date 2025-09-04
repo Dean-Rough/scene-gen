@@ -5,8 +5,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #282c34;
-  color: white;
+  background-color: #f5f5f5;
+  color: #333;
 }
 
 .App {
@@ -14,9 +14,10 @@ body {
 }
 
 .App-header {
-  background-color: #1e2128;
+  background-color: #007bff;
   padding: 20px;
   color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 main {
