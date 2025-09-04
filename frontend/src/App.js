@@ -175,6 +175,22 @@ function App() {
     updateElementInBackend(elementId, transformData);
   };
 
+  const handleElementDelete = async (elementId) => {
+    if (!currentProject) return;
+
+    try {
+      await axios.delete(`${API_BASE}/projects/${currentProject.id}/scene-elements/${elementId}`);
+      
+      // Remove element from local state
+      setSceneElements(elements => elements.filter(el => el.id !== elementId));
+      
+      console.log('Element deleted successfully');
+    } catch (err) {
+      console.error('Error deleting element:', err);
+      setError('Failed to delete element');
+    }
+  };
+
   const handleRender = async () => {
     if (!currentProject) {
       setError('Please create a project first');
@@ -276,6 +292,7 @@ function App() {
               sceneElements={sceneElements}
               onElementPlace={handleElementPlace}
               onElementMove={handleElementMove}
+              onElementDelete={handleElementDelete}
             />
             
             <div className="render-controls" style={{ marginTop: '20px', textAlign: 'center' }}>

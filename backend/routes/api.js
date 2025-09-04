@@ -188,6 +188,30 @@ router.put('/projects/:projectId/scene-elements/:elementId', async (req, res) =>
 });
 
 /**
+ * DELETE /api/projects/:projectId/scene-elements/:elementId
+ * Delete a scene element
+ */
+router.delete('/projects/:projectId/scene-elements/:elementId', async (req, res) => {
+  const { projectId, elementId } = req.params;
+
+  try {
+    const result = await pool.query(
+      'DELETE FROM scene_elements WHERE id = $1 AND project_id = $2 RETURNING *',
+      [elementId, projectId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Scene element not found' });
+    }
+
+    res.json({ message: 'Scene element deleted successfully', element: result.rows[0] });
+  } catch (error) {
+    console.error('Error deleting scene element:', error);
+    res.status(500).json({ error: 'Failed to delete scene element' });
+  }
+});
+
+/**
  * GET /api/projects
  * Get all projects
  */

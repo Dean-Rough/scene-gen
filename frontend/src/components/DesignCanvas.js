@@ -86,7 +86,8 @@ const DesignCanvas = ({
   selectedAsset, 
   sceneElements, 
   onElementPlace,
-  onElementMove 
+  onElementMove,
+  onElementDelete 
 }) => {
   const stageRef = useRef();
   const [canvasDimensions] = useState({ width: 800, height: 600 });
@@ -120,6 +121,27 @@ const DesignCanvas = ({
     // Update element in real-time for smooth UX
     onElementMove(elementId, transformData);
   };
+
+  const handleDeleteElement = () => {
+    if (selectedElementId && onElementDelete) {
+      onElementDelete(selectedElementId);
+      setSelectedElementId(null);
+    }
+  };
+
+  // Keyboard event handling
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Delete' && selectedElementId) {
+        handleDeleteElement();
+      } else if (e.key === 'Escape') {
+        setSelectedElementId(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedElementId]);
 
   return (
     <div className="design-canvas">
@@ -197,25 +219,41 @@ const DesignCanvas = ({
             </p>
             {sceneElements.length > 0 && (
               <p style={{ margin: '5px 0 0 0', fontSize: '12px', color: '#6c757d' }}>
-                📍 Assets placed: {sceneElements.length} | {selectedElementId ? '✏️ Element selected - drag, scale, or rotate' : '👆 Click elements to select'}
+                📍 Assets placed: {sceneElements.length} | {selectedElementId ? '✏️ Selected - drag, scale, rotate, or press Delete' : '👆 Click elements to select'}
               </p>
             )}
           </div>
           {selectedElementId && (
-            <button
-              onClick={() => setSelectedElementId(null)}
-              style={{
-                padding: '5px 10px',
-                fontSize: '12px',
-                backgroundColor: '#6c757d',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              Deselect
-            </button>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                onClick={handleDeleteElement}
+                style={{
+                  padding: '5px 10px',
+                  fontSize: '12px',
+                  backgroundColor: '#dc3545',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                🗑️ Delete
+              </button>
+              <button
+                onClick={() => setSelectedElementId(null)}
+                style={{
+                  padding: '5px 10px',
+                  fontSize: '12px',
+                  backgroundColor: '#6c757d',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                Deselect
+              </button>
+            </div>
           )}
         </div>
       </div>
