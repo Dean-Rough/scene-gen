@@ -4,6 +4,9 @@ import DesignCanvas from './components/DesignCanvas';
 import AssetLibrary from './components/AssetLibrary';
 import './App.css';
 
+// API base URL for production vs development
+const API_BASE = process.env.NODE_ENV === 'production' ? '/api' : '/api';
+
 function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
@@ -25,7 +28,7 @@ function App() {
 
   const loadProjects = async () => {
     try {
-      const response = await axios.get('/api/projects');
+      const response = await axios.get(`${API_BASE}/projects`);
       setProjects(response.data);
       
       // If no projects exist, create a default one
@@ -42,7 +45,7 @@ function App() {
 
   const createProject = async (name) => {
     try {
-      const response = await axios.post('/api/projects', { name });
+      const response = await axios.post(`${API_BASE}/projects`, { name });
       const newProject = response.data;
       setProjects([newProject, ...projects]);
       setCurrentProject(newProject);
@@ -57,7 +60,7 @@ function App() {
 
   const loadProject = async (projectId) => {
     try {
-      const response = await axios.get(`/api/projects/${projectId}`);
+      const response = await axios.get(`${API_BASE}/projects/${projectId}`);
       const project = response.data;
       setCurrentProject(project);
       setAssets(project.assets || []);
@@ -76,7 +79,7 @@ function App() {
     if (!currentProject) return;
 
     try {
-      const response = await axios.post(`/api/projects/${currentProject.id}/assets`, {
+      const response = await axios.post(`${API_BASE}/projects/${currentProject.id}/assets`, {
         type: newAsset.type,
         imageUrl: newAsset.imageUrl,
         attributes: newAsset.attributes || {}
@@ -99,7 +102,7 @@ function App() {
     if (!currentProject) return;
 
     try {
-      const response = await axios.post(`/api/projects/${currentProject.id}/scene-elements`, elementData);
+      const response = await axios.post(`${API_BASE}/projects/${currentProject.id}/scene-elements`, elementData);
       const newElement = response.data;
       
       // Add asset info for rendering
@@ -155,7 +158,7 @@ function App() {
     };
 
     try {
-      const response = await axios.post('/api/render', designData);
+      const response = await axios.post(`${API_BASE}/render`, designData);
       // Handle both old format (just imageUrl) and new format (full AI response)
       if (response.data.success) {
         setImageUrl(response.data); // Store the full AI response
