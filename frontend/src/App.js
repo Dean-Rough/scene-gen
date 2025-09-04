@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import DesignCanvas from './components/DesignCanvas';
 import AssetLibrary from './components/AssetLibrary';
@@ -6,6 +6,19 @@ import './App.css';
 
 // API base URL for production vs development
 const API_BASE = process.env.NODE_ENV === 'production' ? '/api' : '/api';
+
+// Debounce utility function
+const debounce = (func, wait) => {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+};
 
 function App() {
   const [isLoading, setIsLoading] = useState(false);
@@ -120,17 +133,46 @@ function App() {
     }
   };
 
-  const handleElementMove = (elementId, newPosition) => {
-    // Update local state immediately for smooth UX
+  // Debounced API call to persist element transformations
+  const updateElementInBackend = useCallback(
+    debounce(async (elementId, transformData) => {
+      if (!currentProject) return;
+      
+      try {
+        await axios.put(`${API_BASE}/projects/${currentProject.id}/scene-elements/${elementId}`, {
+          positionX: transformData.positionX,
+          positionY: transformData.positionY,
+          rotationZ: transformData.rotation,
+          scaleX: transformData.scaleX,
+          scaleY: transformData.scaleY
+        });
+      } catch (err) {
+        console.error('Error updating element transform:', err);
+        // Could add error handling/retry logic here
+      }
+    }, 500), // 500ms debounce delay
+    [currentProject]
+  );
+
+  const handleElementMove = (elementId, transformData) => {
+    // Update local state immediately for smooth UX with all transform properties
     setSceneElements(elements => 
       elements.map(el => 
         el.id === elementId 
-          ? { ...el, position_x: newPosition.positionX, position_y: newPosition.positionY }
+          ? { 
+              ...el, 
+              position_x: transformData.positionX !== undefined ? transformData.positionX : el.position_x,
+              position_y: transformData.positionY !== undefined ? transformData.positionY : el.position_y,
+              rotation_z: transformData.rotation !== undefined ? transformData.rotation : el.rotation_z,
+              scale_x: transformData.scaleX !== undefined ? transformData.scaleX : el.scale_x,
+              scale_y: transformData.scaleY !== undefined ? transformData.scaleY : el.scale_y
+            }
           : el
       )
     );
     
-    // TODO: Debounce API call to update position in backend
+    // Debounced API call to persist changes
+    updateElementInBackend(elementId, transformData);
   };
 
   const handleRender = async () => {

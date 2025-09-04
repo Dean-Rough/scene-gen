@@ -156,6 +156,38 @@ router.post('/projects/:id/scene-elements', async (req, res) => {
 });
 
 /**
+ * PUT /api/projects/:projectId/scene-elements/:elementId
+ * Update a scene element's transform properties
+ */
+router.put('/projects/:projectId/scene-elements/:elementId', async (req, res) => {
+  const { projectId, elementId } = req.params;
+  const { positionX, positionY, rotationZ, scaleX, scaleY } = req.body;
+
+  try {
+    const result = await pool.query(`
+      UPDATE scene_elements 
+      SET position_x = COALESCE($1, position_x),
+          position_y = COALESCE($2, position_y), 
+          rotation_z = COALESCE($3, rotation_z),
+          scale_x = COALESCE($4, scale_x),
+          scale_y = COALESCE($5, scale_y),
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = $6 AND project_id = $7
+      RETURNING *
+    `, [positionX, positionY, rotationZ, scaleX, scaleY, elementId, projectId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Scene element not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error updating scene element:', error);
+    res.status(500).json({ error: 'Failed to update scene element' });
+  }
+});
+
+/**
  * GET /api/projects
  * Get all projects
  */
