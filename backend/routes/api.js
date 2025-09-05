@@ -11,7 +11,7 @@ const pool = new Pool({
 // Initialize Gemini AI client
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-image-preview" });
 
 /**
  * POST /api/projects
@@ -240,11 +240,12 @@ router.post('/render', async (req, res) => {
   });
 
   try {
-    // 1. CONSTRUCT THE MULTIMODAL PROMPT
-    let prompt = `Create a photorealistic interior design rendering based on the following specifications:
+    // 1. CONSTRUCT THE MULTIMODAL PROMPT FOR DESIGN ANALYSIS
+    let prompt = `You are a professional interior designer with expertise in spatial planning, color theory, and contemporary design trends. Analyze this interior design project and provide comprehensive recommendations:
 
-STYLE: ${style}
-CAMERA: ${camera.angle || 'eye-level'} perspective, facing ${camera.direction || 'north'}
+🏠 PROJECT DETAILS:
+DESIGN STYLE: ${style}
+VIEWING PERSPECTIVE: ${camera.angle || 'eye-level'} view, facing ${camera.direction || 'north'}
 
 ROOM LAYOUT:`;
 
@@ -273,12 +274,18 @@ ROOM LAYOUT:`;
 - Arrange furniture in a natural, livable layout`;
     }
 
-    prompt += `\n\nRENDER REQUIREMENTS:
-- Photorealistic quality with proper lighting and shadows
-- High resolution and professional interior design presentation
-- Warm, inviting atmosphere suitable for a modern home
-- Include realistic materials and textures
-- Ensure proper scale and proportions for all elements`;
+    prompt += `\n\n🎯 DESIGN CONSULTATION REQUIRED:
+Please provide a comprehensive interior design analysis including:
+
+1. **SPATIAL ASSESSMENT** - Room flow, proportions, and layout efficiency
+2. **STYLE COHESION** - How well elements work together in the chosen style
+3. **FURNITURE PLACEMENT** - Optimization of current layout and suggestions for improvement
+4. **COLOR & MATERIALS** - Palette recommendations, texture combinations, and material selections
+5. **LIGHTING STRATEGY** - Natural and artificial lighting recommendations for ambiance and function
+6. **FUNCTIONAL IMPROVEMENTS** - Storage solutions, traffic flow, and practical enhancements
+7. **DESIGN UPGRADES** - Specific recommendations to elevate the space's aesthetic appeal
+
+Please respond as a professional interior designer would in a client consultation - practical, specific, and actionable advice.`;
 
     console.log('🧠 Constructed prompt for Gemini AI');
 
